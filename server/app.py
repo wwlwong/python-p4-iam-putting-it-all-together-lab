@@ -8,10 +8,27 @@ from config import app, db, api
 from models import User, Recipe
 
 class Signup(Resource):
-    pass
+    def post(self):
+        json = request.get_json()
+        user = User(
+            username=json['username'],
+            password_hash=json['password'],
+            image_url=json['image_url'],
+            bio=json['bio']
+        )
+        db.session.add(user)
+        db.session.commit()
+        session['user_id'] = user.id
+        return user.to_dict(), 201
 
 class CheckSession(Resource):
-    pass
+    def get(self):
+        user_id = session['user_id']
+        if user_id:
+            user = User.query.filter(User.id == user_id).first()
+            return user.to_dict(), 200
+        
+        return {'error' : 'Unauthorized'}, 401
 
 class Login(Resource):
     pass
